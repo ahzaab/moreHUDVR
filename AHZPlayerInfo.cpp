@@ -9,7 +9,7 @@
 #include "skse64/Hooks_Gameplay.h"
 
 typedef  UInt32(*GET_GOLD_AMOUNT)(Actor* a1);
-RelocAddr<GET_GOLD_AMOUNT>GetGoldAmount_Native(0x0029DF80);
+RelocAddr<GET_GOLD_AMOUNT>GetGoldAmount_Native(0x005EFA10);
 //.text:00007FF6D6A774E0
 //.text : 00007FF6D6A774E0; ============== = S U B R O U T I N E ====================================== =
 //.text:00007FF6D6A774E0
