@@ -274,7 +274,7 @@ extern "C"
 {
    bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
    {
-      gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\SkyrimVR\\SKSE\\moreHUDSE.log");
+      gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Skyrim VR\\SKSE\\moreHUDVR.log");
       gLog.SetPrintLevel(IDebugLog::kLevel_VerboseMessage);
       gLog.SetLogLevel(IDebugLog::kLevel_Message);
 
@@ -363,8 +363,8 @@ extern "C"
          return false;
       }
 
-      AHZInstallEnemyHealthUpdateHook();
-	  AHZInstallWandLookupREFRByHandle();
+	  AHZScaleformHooks_Commit();
+
       _MESSAGE("%s -v%d Loaded", "AHZmoreHUDPlugin", PLUGIN_VERSION);
       return true;
    }

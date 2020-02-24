@@ -22,6 +22,7 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
 {
    string menuName(evn->menuName.data);
    _VMESSAGE("Menu: %s", menuName.c_str());
+   return EventResult::kEvent_Continue;
    if ((ahzMenuLoaded == false) && (menuName == "WSActivateRollover") && (evn->opening))
    {
       GFxMovieView *view = MenuManager::GetSingleton()->GetMovieView(&evn->menuName);
@@ -46,7 +47,8 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
 
 
          args[0].SetString("AHZWidgetContainer");
-         view->Invoke("getNextHighestDepth", &args[1], NULL, 0);
+         //view->Invoke("getNextHighestDepth", &args[1], NULL, 0);
+		 args[1].SetNumber(-16384);
          view->Invoke("createEmptyMovieClip", &hudComponent, args, 2);
 
          if (!hudComponent.objectInterface)
@@ -670,4 +672,44 @@ void AHZInstallWandLookupREFRByHandle()
 	g_localTrampoline.EndAlloc(code.getCurr());
 
 	g_branchTrampoline.Write5Branch(kHook_Wand_LookupREFRByHandle_Enter.GetUIntPtr(), uintptr_t(code.getCode()));
+}
+
+void SetupFixedString(const char* constString, char * buffer, UInt32 bufferSize)
+{
+	memset(buffer, 0, bufferSize);
+	UInt32 len = strlen(constString);
+	memcpy_s(buffer, bufferSize, constString, len);
+}
+
+void AHZScaleformHooks_Commit()
+{
+	//const UInt32 SWF_FILE_ALIGNMENT = 0x18;
+	//RelocAddr<uintptr_t> SWF_FILE_ADDRESS(0x16AD8C8);  //Vanilla = "VR/ActivateRollover"
+	//char swfFileBuff[SWF_FILE_ALIGNMENT];
+	//SetupFixedString("VR/AHZActivateRollover", swfFileBuff, SWF_FILE_ALIGNMENT);
+	//SafeWriteBuf(SWF_FILE_ADDRESS.GetUIntPtr(), swfFileBuff, sizeof(swfFileBuff));
+
+	//const UInt32 VRActivateRolloverInstance_RegisterComponents_align = 0x30;
+	//RelocAddr<uintptr_t> VRActivateRolloverInstance_RegisterComponents_Enter(0x16AD8E0);  //Vanilla = "VRActivateRolloverInstance.RegisterComponents"
+	//char VRActivateRolloverInstance_RegisterComponents_buff[VRActivateRolloverInstance_RegisterComponents_align];
+	//SetupFixedString("MHActivateRolloverInstance.RegisterComponents", VRActivateRolloverInstance_RegisterComponents_buff, VRActivateRolloverInstance_RegisterComponents_align);
+	//SafeWriteBuf(VRActivateRolloverInstance_RegisterComponents_Enter.GetUIntPtr(), VRActivateRolloverInstance_RegisterComponents_buff, sizeof(VRActivateRolloverInstance_RegisterComponents_buff));
+
+
+	//const UInt32 VRActivateRolloverInstance_SetCrosshairTarget_align = 0x30;
+	//RelocAddr<uintptr_t> VRActivateRolloverInstance_SetCrosshairTarget_Enter(0x16AD910);  //Vanilla = "VRActivateRolloverInstance.SetCrosshairTarget"
+	//char VRActivateRolloverInstance_SetCrosshairTarget_buff[VRActivateRolloverInstance_SetCrosshairTarget_align];
+	//SetupFixedString("MHActivateRolloverInstance.SetCrosshairTarget", VRActivateRolloverInstance_SetCrosshairTarget_buff, VRActivateRolloverInstance_SetCrosshairTarget_align);
+	//SafeWriteBuf(VRActivateRolloverInstance_SetCrosshairTarget_Enter.GetUIntPtr(), VRActivateRolloverInstance_SetCrosshairTarget_buff, sizeof(VRActivateRolloverInstance_SetCrosshairTarget_buff));
+
+
+	//const UInt32 VRActivateRolloverInstance_RefreshActivateButtonArt_align = 0x38;
+	//RelocAddr<uintptr_t> VRActivateRolloverInstance_RefreshActivateButtonArt_Enter(0x16AD9B8);  //Vanilla = "VRActivateRolloverInstance.RefreshActivateButtonArt"
+	//char VRActivateRolloverInstance_RefreshActivateButtonArt_buff[VRActivateRolloverInstance_RefreshActivateButtonArt_align];
+	//SetupFixedString("MHActivateRolloverInstance.RefreshActivateButtonArt", VRActivateRolloverInstance_RefreshActivateButtonArt_buff, VRActivateRolloverInstance_RefreshActivateButtonArt_align);
+	//SafeWriteBuf(VRActivateRolloverInstance_RefreshActivateButtonArt_Enter.GetUIntPtr(), VRActivateRolloverInstance_RefreshActivateButtonArt_buff, sizeof(VRActivateRolloverInstance_RefreshActivateButtonArt_buff));
+
+
+	AHZInstallEnemyHealthUpdateHook();
+	AHZInstallWandLookupREFRByHandle();
 }

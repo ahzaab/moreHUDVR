@@ -2,8 +2,11 @@
 #include "skse64/PapyrusEvents.h"
 #include "AHZActorInfo.h"
 
-void AHZInstallEnemyHealthUpdateHook();
-void AHZInstallWandLookupREFRByHandle();
+//void AHZInstallEnemyHealthUpdateHook();
+//void AHZInstallWandLookupREFRByHandle();
+
+void AHZScaleformHooks_Commit();
+
 CAHZActorData GetCurrentEnemyData();
 TESObjectREFR * GetCurrentWandReference();
 extern TESObjectREFR *g_ahzTargetReference;
