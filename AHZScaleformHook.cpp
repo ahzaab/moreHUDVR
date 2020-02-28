@@ -22,8 +22,7 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
 {
    string menuName(evn->menuName.data);
    _VMESSAGE("Menu: %s", menuName.c_str());
-   return EventResult::kEvent_Continue;
-   if ((ahzMenuLoaded == false) && (menuName == "WSActivateRollover") && (evn->opening))
+   if ((ahzMenuLoaded == false) && (menuName == "WSEnemyMeters") && (evn->opening))
    {
       GFxMovieView *view = MenuManager::GetSingleton()->GetMovieView(&evn->menuName);
       if (view)
@@ -46,22 +45,20 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
 
 
 
-         args[0].SetString("AHZWidgetContainer");
-         //view->Invoke("getNextHighestDepth", &args[1], NULL, 0);
-		 args[1].SetNumber(-16384);
+         args[0].SetString("AHZEnemyLevelInstance");
+         view->Invoke("getNextHighestDepth", &args[1], NULL, 0);
          view->Invoke("createEmptyMovieClip", &hudComponent, args, 2);
 
          if (!hudComponent.objectInterface)
          {
-            _ERROR("moreHUD could not create an empty movie clip for the WSActivateRollover. The moreHUD widgets will not be loaded.");
+            _ERROR("moreHUD could not create an empty movie clip for the WSEnemyMeters. The moreHUD enemy data will not be loaded.");
             return EventResult::kEvent_Abort;
          }
 
-         args[0].SetString("AHZHudInfo.swf");
+         args[0].SetString("AHZEnemyLevel.swf");
          hudComponent.Invoke("loadMovie", &result, &args[0], 1);
-         //ahzMenuLoaded = true;
-        // return EventResult::kEvent_Abort;
-		 return EventResult::kEvent_Continue;
+         ahzMenuLoaded = true;
+         return EventResult::kEvent_Abort;
       }
    }
 
