@@ -52,7 +52,7 @@ SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (10000)
+#define PLUGIN_VERSION  (10002)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -351,13 +351,13 @@ extern "C"
       // Register listener for the gme loaded event
       g_skseMessaging->RegisterListener(skse->GetPluginHandle(), "SKSE", EventListener);
 
-      if (!g_branchTrampoline.Create(1024 * 64))
+      if (!g_branchTrampoline.Create(1024 * 4))
       {
          _ERROR("couldn't create branch trampoline. this is fatal. skipping remainder of init process.");
          return false;
       }
 
-      if (!g_localTrampoline.Create(1024 * 64, nullptr))
+      if (!g_localTrampoline.Create(1024 * 4, nullptr))
       {
          _ERROR("couldn't create codegen buffer. this is fatal. skipping remainder of init process.");
          return false;

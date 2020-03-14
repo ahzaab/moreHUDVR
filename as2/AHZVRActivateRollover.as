@@ -462,7 +462,7 @@ class AHZVRActivateRollover extends VRActivateRollover
 		if (viewBottomInfo)
 		{
 			var tempType:Number;
-			if (formType == AHZInventoryDefines.kWeapon || formType == AHZInventoryDefines.kAmmo)
+			if (formType == AHZInventoryDefines.kWeapon || formType == AHZInventoryDefines.kAmmo || formType == AHZInventoryDefines.kProjectile)
 			{
 				tempType = AHZInventoryDefines.ICT_WEAPON;
 			}
