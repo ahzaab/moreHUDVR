@@ -91,7 +91,10 @@ Copy-Item $destSksePlugin "$tempDir\Data\SKSE\Plugins"
 Copy-Item "$destDataDir\meshes\vr_enemyhealthbar.nif" "$tempDir\Data\meshes"
 Copy-Item "$destDataDir\interface\vr\activaterollover.swf" "$tempDir\Data\Interface\vr"
 
-& "C:\Program Files\7-Zip\7z" a "$versionDir\$($pluginFile.Replace(".esp", ".7z"))" "$tempDir\Data" -mx5 -t7z
+$fileVersionNane = $Version.Replace('.', '_')
+$zipFileName = $pluginFile.Replace('.esp', "$fileVersionNane.7z")
+
+Start-Process "C:\Program Files\7-Zip\7z" -ArgumentList "a `"$versionDir\$zipFileName`" `"$tempDir\Data`" -mx5 -t7z" -wait -NoNewWindow -PassThru
 
 }
 finally
