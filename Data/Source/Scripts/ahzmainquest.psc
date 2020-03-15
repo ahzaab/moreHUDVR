@@ -22,7 +22,7 @@ int Property iVersion Auto
 ; <--- Edit These value when updating
 int Property I_THIS_VERSION_MAJOR = 1 autoReadOnly
 int Property I_THIS_VERSION_MINOR = 0 autoReadOnly
-int Property I_THIS_VERSION_BUILD = 0 autoReadOnly
+int Property I_THIS_VERSION_BUILD = 2 autoReadOnly
 ; Main Rollover Menu
 String Property VRActivateRolloverInstance = "_root.VRActivateRolloverInstance" autoReadOnly
 String Property WSActivateRollover = "WSActivateRollover" autoReadOnly
@@ -66,6 +66,9 @@ Function Maintenance()
     ; the first time.  Since 1.5.3 Some users have reported that the widgets did not
     ; load correctly on startup  
     RegisterForModEvent("SKIWF_widgetManagerReady", "OnWidgetManagerReady")
+
+   RegisterForMenu(WSActivateRollover)
+   RegisterForMenu(WSEnemyMeters)
 EndFunction
 
 function RefreshWidgets()
@@ -127,8 +130,6 @@ endfunction
 
 Event OnInit()
     Maintenance()
-   RegisterForMenu(WSActivateRollover)
-   RegisterForMenu(WSEnemyMeters)
 EndEvent
 
 event OnWidgetManagerReady(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
@@ -137,22 +138,18 @@ event OnWidgetManagerReady(string a_eventName, string a_strArg, float a_numArg, 
 EndEvent
  
 Event OnMenuOpen(String MenuName)
-	Debug.Trace("A registered menu has opened.")
 	If MenuName == WSEnemyMeters
-		Debug.Trace("WSActivateRolloverhas been registered and has opened.")
-            ; Update The menu with the global variables the first time it is loaded
-            UpdateSettings(false)
-           UnregisterForMenu(WSEnemyMeters)
+		; Update The menu with the global variables the first time it is loaded
+		UpdateSettings(false)  
+		UnregisterForMenu(WSEnemyMeters)   
 	EndIf
 
 	If MenuName == WSActivateRollover
-		Debug.Trace("WSActivateRollove rhas been registered and has opened.")
-            ; Update The menu with the global variables the first time it is loaded
-            UpdateSettings(false)
-            UnregisterForMenu(WSActivateRollover)
+		; Update The menu with the global variables the first time it is loaded
+		UpdateSettings(false)
+		UnregisterForMenu(WSActivateRollover)
 	EndIf
 EndEvent
-
 
 ; Private Functions-------------------------------------------------------------------------------------
 
