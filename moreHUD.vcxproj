@@ -171,7 +171,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ForcedIncludeFiles>common/IPrefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>common/IPrefix.h</ForcedIncludeFiles>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -208,6 +209,7 @@
     <ClCompile Include="..\skse64\GameThreads.cpp" />
     <ClCompile Include="..\skse64\GameTypes.cpp" />
     <ClCompile Include="..\skse64\GameUtilities.cpp" />
+    <ClCompile Include="..\skse64\GameVR.cpp" />
     <ClCompile Include="..\skse64\GlobalLocks.cpp" />
     <ClCompile Include="..\skse64\HashUtil.cpp" />
     <ClCompile Include="..\skse64\Hooks_Camera.cpp" />
@@ -229,8 +231,8 @@
     <ClCompile Include="..\skse64\InputMap.cpp" />
     <ClCompile Include="..\skse64\InternalSerialization.cpp" />
     <ClCompile Include="..\skse64\InternalTasks.cpp" />
+    <ClCompile Include="..\skse64\InternalVR.cpp" />
     <ClCompile Include="..\skse64\NiAdditionalGeometryData.cpp" />
-    <ClCompile Include="..\skse64\NiAllocator.cpp" />
     <ClCompile Include="..\skse64\NiControllers.cpp" />
     <ClCompile Include="..\skse64\NiExtraData.cpp" />
     <ClCompile Include="..\skse64\NiGeometry.cpp" />
@@ -371,6 +373,12 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AHZmoreHUDPlugin.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="AHZActorInfoAddressInfo.txt" />
+    <Text Include="AHZPlayerInfoAddressInfo.txt" />
+    <Text Include="AHZScaleformAddressInfo.txt" />
+    <Text Include="AHZScaleformHooksAddressInfo.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
