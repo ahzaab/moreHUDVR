@@ -288,9 +288,6 @@
     <ClCompile Include="..\skse64\NiAdditionalGeometryData.cpp">
       <Filter>skse64\SKSE64 Dependencies</Filter>
     </ClCompile>
-    <ClCompile Include="..\skse64\NiAllocator.cpp">
-      <Filter>skse64\SKSE64 Dependencies</Filter>
-    </ClCompile>
     <ClCompile Include="..\skse64\NiLight.cpp">
       <Filter>skse64\SKSE64 Dependencies</Filter>
     </ClCompile>
@@ -458,6 +455,12 @@
     <ClCompile Include="AHZVanillaFormTable.cpp" />
     <ClCompile Include="AHZExternalFormTable.cpp" />
     <ClCompile Include="AHZActorInfo.cpp" />
+    <ClCompile Include="..\skse64\GameVR.cpp">
+      <Filter>skse64\SKSE64 Dependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="..\skse64\InternalVR.cpp">
+      <Filter>skse64\SKSE64 Dependencies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h">
@@ -488,5 +491,11 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AHZmoreHUDPlugin.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="AHZScaleformHooksAddressInfo.txt" />
+    <Text Include="AHZActorInfoAddressInfo.txt" />
+    <Text Include="AHZPlayerInfoAddressInfo.txt" />
+    <Text Include="AHZScaleformAddressInfo.txt" />
   </ItemGroup>
 </Project>

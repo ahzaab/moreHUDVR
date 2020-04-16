@@ -58,9 +58,6 @@ private:
    std::vector<string> m_scriptVMVariables;
    std::map<UInt32, UInt32> m_LUT;
    std::map<string, UInt32> m_modIndexLUT;
-   UInt32 GetPartialIndex(const ModInfo * modInfo) const;
-   UInt32 GetModFormID(const ModInfo * modInfo, UInt32 formLower) const;
-   bool IsModActive(const ModInfo * modInfo) const;
 };
 
 #define AHZGetForm(x) (CAHZFormLookup::Instance().GetTESForm((x)))

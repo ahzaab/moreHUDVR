@@ -18,7 +18,6 @@
 #include "skse64/PapyrusVM.h"
 #include "skse64/PapyrusEvents.h"
 #include "skse64/GameExtraData.h"
-#include "skse64/GameBSExtraData.h"
 #include <list>
 #include <algorithm>
 #include "skse64/PapyrusObjectReference.h"

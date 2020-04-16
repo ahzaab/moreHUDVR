@@ -1,16 +1,5 @@
 ﻿#include "AHZFormLookup.h"
 
-// Alignemnt comes from https://github.com/Ryan-rsm-McKenzie/CommonLibSSE/blob/master/include/RE/Projectile.h
-// Credit goes to Ryan.  I only needed the one item 
-class AHZProjectile : public TESObjectREFR
-{
-public:
-	UInt8	unk98[0x147 - 0x98];	// 98
-	InventoryEntryData *extraData;	// 148
-	UInt8	unk150[0x1B7 - 0x150];	// 150
-	TESAmmo * sourceAmmo;			// 1B8
-};
-
 // Base Address = 7FF62ACA0000
 //.text:00007FF62BEEF240; == == == == == == == = S U B R O U T I N E == == == == == == == == == == == == == == == == == == == =
 //.text:00007FF62BEEF240
@@ -192,17 +181,17 @@ TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 	{
 		return lutForm;
 	}
-	else if (targetReference->baseForm->formType == kFormType_Activator)
+	else if (targetReference->baseForm && targetReference->baseForm->formType == kFormType_Activator)
 	{
 		return GetAttachedForm(targetReference);
 	}
-	else if (targetReference->baseForm->formType == kFormType_Projectile)
+	else if (targetReference->baseForm && targetReference->baseForm->formType == kFormType_Projectile)
 	{
 		Projectile *pProjectile = (DYNAMIC_CAST(targetReference, TESObjectREFR, Projectile));
 
 		if (pProjectile) {
 			AHZProjectile *a = (AHZProjectile*)(pProjectile);
-			if (a)
+			if (a && a->sourceAmmo)
 				return a->sourceAmmo;
 			else
 				return targetReference;
@@ -218,13 +207,16 @@ TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 
 TESForm * CAHZFormLookup::GetFormFromLookup(TESObjectREFR * targetRef)
 {
-   if (m_LUT.find(targetRef->baseForm->formID) != m_LUT.end())
-   {
-      UInt32 formID = m_LUT.find(targetRef->baseForm->formID)->second;
-      TESForm * form = LookupFormByID(formID);
-      return form;
-   }
-   return NULL;
+	if (!targetRef->baseForm)
+		return NULL;
+
+	if (m_LUT.find(targetRef->baseForm->formID) != m_LUT.end())
+	{
+		UInt32 formID = m_LUT.find(targetRef->baseForm->formID)->second;
+		TESForm * form = LookupFormByID(formID);
+		return form;
+	}
+	return NULL;
 }
 
 void CAHZFormLookup::AddScriptVarable(string vmVariableName)
@@ -248,35 +240,21 @@ void CAHZFormLookup::AddScriptVarable(string vmVariableName)
    }
 }
 
-// Returns either a modIndex or a modIndex|lightIndex pair
-UInt32 CAHZFormLookup::GetPartialIndex(const ModInfo * modInfo) const
-{
-	return modInfo->modIndex;
-}
-
-// Converts the lower bits of a FormID to a full FormID depending on plugin type
-UInt32 CAHZFormLookup::GetModFormID(const ModInfo * modInfo, UInt32 formLower) const
-{
-	return UInt32(modInfo->modIndex) << 24 | (formLower & 0xFFFFFF);
-}
-
-bool CAHZFormLookup::IsModActive(const ModInfo * modInfo) const { return modInfo->modIndex != 0xFF; }
-
 void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string targetFormModName, UInt32 targetFormID)
 {
    DataHandler * dataHandler = DataHandler::GetSingleton();
    const ModInfo * baseModInfo = dataHandler->LookupModByName(baseFormModName.c_str());
-   if (!baseModInfo || !IsModActive(baseModInfo))
+   if (!baseModInfo || !baseModInfo->IsActive())
       return;
 
    const ModInfo * targetModInfo = dataHandler->LookupModByName(targetFormModName.c_str());
-   if (!targetModInfo || !IsModActive(targetModInfo))
+   if (!targetModInfo || !targetModInfo->IsActive())
       return;
 
    // If not exists
    if (m_modIndexLUT.find(baseFormModName) == m_modIndexLUT.end())
    {
-      UInt32 modIndex = GetPartialIndex(targetModInfo);
+      UInt32 modIndex = baseModInfo->GetPartialIndex();
 
       //UInt32 modIndex = ((UInt32)dataHandler->GetModIndex(b.data) & 0x000000FF) << 24;
       _VMESSAGE("ACTI Base Mod:%s, idx:%08X", baseFormModName.c_str(), modIndex);
@@ -286,7 +264,7 @@ void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string
    // If not exists
    if (m_modIndexLUT.find(targetFormModName) == m_modIndexLUT.end())
    {
-      UInt32 modIndex = targetModInfo->modIndex;
+      UInt32 modIndex = targetModInfo->GetPartialIndex();
 
       //UInt32 modIndex = ((UInt32)dataHandler->GetModIndex(b.data) & 0x000000FF) << 24;
       _VMESSAGE("ACTI Targ Mod:%s, idx:%08X", targetFormModName.c_str(), modIndex);
@@ -298,8 +276,8 @@ void CAHZFormLookup::AddFormID(string baseFormModName, UInt32 baseFormID, string
    {
       //UInt32 baseModIndex = m_modIndexLUT[baseFormModName];
       //UInt32 targetModIndex = m_modIndexLUT[targetFormModName];
-      UInt32 baseForm = GetModFormID(baseModInfo, baseFormID); //(baseFormID & 0x00FFFFFF) | baseModIndex;
-      UInt32 targetForm = GetModFormID(targetModInfo, targetFormID); //(targetFormID & 0x00FFFFFF) | targetModIndex;
+      UInt32 baseForm = baseModInfo->GetFormID(baseFormID); //(baseFormID & 0x00FFFFFF) | baseModIndex;
+      UInt32 targetForm = targetModInfo->GetFormID(targetFormID); //(targetFormID & 0x00FFFFFF) | targetModIndex;
       // Load into map if the entry does not already exist
       if (m_LUT.find(baseForm) == m_LUT.end())
       {
@@ -318,6 +296,11 @@ TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
       return NULL;
    }
 
+   if (!form->baseForm)
+   {
+	   return NULL;
+   }
+
    if (form->baseForm->formType != kFormType_Activator)
    {
       return NULL;
@@ -334,7 +317,7 @@ TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
             TESLevItem *lvli = DYNAMIC_CAST(attachedForm, TESForm, TESLevItem);
 
             // Get the first form and see if it is an ingredient
-            if (lvli->leveledList.length > 0)
+            if (lvli && lvli->leveledList.length > 0)
             {
                TESForm *itemform = (TESForm *)lvli->leveledList.entries[0].form;
                return itemform;
@@ -345,7 +328,7 @@ TESForm * CAHZFormLookup::GetAttachedForm(TESObjectREFR *form)
             BGSListForm *lvli = DYNAMIC_CAST(attachedForm, TESForm, BGSListForm);
 
             // Get the first form and see if it is an ingredient
-            if (lvli->forms.count > 0)
+            if (lvli && lvli->forms.count > 0)
             {
                TESForm *itemform = (TESForm *)lvli->forms.entries[0];
                return itemform;
@@ -366,6 +349,10 @@ TESForm* CAHZFormLookup::GetAttachedForm(TESObjectREFR *form, string variableNam
    if (form) {
       VMClassRegistry		* registry = (*g_skyrimVM)->GetClassRegistry();
       IObjectHandlePolicy	* policy = registry->GetHandlePolicy();
+
+	  if (!form->baseForm)
+		  return NULL;
+
       UInt64 handle = policy->Create(form->baseForm->formType, form);
       if (handle != policy->GetInvalidHandle())
       {

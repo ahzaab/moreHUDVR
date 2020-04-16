@@ -50,9 +50,10 @@ PluginHandle	g_pluginHandle = kPluginHandle_Invalid;
 static UInt32 g_skseVersion = 0;
 SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
+SKSETrampolineInterface * g_trampoline = nullptr;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (10002)
+#define PLUGIN_VERSION  (10003)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -298,7 +299,7 @@ extern "C"
 
          return false;
       }
-      else if (SKSE_VERSION_RELEASEIDX < 58)
+      else if (SKSE_VERSION_RELEASEIDX < 59)
       {
          _ERROR("unsupported skse release index %08X", SKSE_VERSION_RELEASEIDX);
 
@@ -329,6 +330,14 @@ extern "C"
          return false;
       }
 
+
+      g_trampoline = (SKSETrampolineInterface *)skse->QueryInterface(kInterface_Trampoline);
+      if (!g_trampoline)
+      {
+          _ERROR("couldn't get trampline interface");
+          return false;
+      }
+
       // supported runtime version
       return true;
    }
@@ -350,17 +359,35 @@ extern "C"
 
       // Register listener for the gme loaded event
       g_skseMessaging->RegisterListener(skse->GetPluginHandle(), "SKSE", EventListener);
+      
+      static const size_t TRAMPOLINE_SIZE = 256; // 42 + 42 + 14 + 14 with some extra.
+      if (g_trampoline) {
+          void* branch = g_trampoline->AllocateFromBranchPool(skse->GetPluginHandle(), TRAMPOLINE_SIZE);
+          if (!branch) {
+              _ERROR("couldn't create branch trampoline. this is fatal. skipping remainder of init process.");
+              return false;
+          }
 
-      if (!g_branchTrampoline.Create(1024 * 4))
-      {
-         _ERROR("couldn't create branch trampoline. this is fatal. skipping remainder of init process.");
-         return false;
+          g_branchTrampoline.SetBase(TRAMPOLINE_SIZE, branch);
+
+          void* local = g_trampoline->AllocateFromLocalPool(skse->GetPluginHandle(), TRAMPOLINE_SIZE);
+          if (!local) {
+              _ERROR("couldn't create codegen buffer. this is fatal. skipping remainder of init process.");
+              return false;
+          }
+
+          g_localTrampoline.SetBase(TRAMPOLINE_SIZE, local);
       }
-
-      if (!g_localTrampoline.Create(1024 * 4, nullptr))
-      {
-         _ERROR("couldn't create codegen buffer. this is fatal. skipping remainder of init process.");
-         return false;
+      else {
+          if (!g_branchTrampoline.Create(TRAMPOLINE_SIZE)) {
+              _ERROR("couldn't create branch trampoline. this is fatal. skipping remainder of init process.");
+              return false;
+          }
+          if (!g_localTrampoline.Create(TRAMPOLINE_SIZE, nullptr))
+          {
+              _ERROR("couldn't create codegen buffer. this is fatal. skipping remainder of init process.");
+              return false;
+          }
       }
 
 	  AHZScaleformHooks_Commit();

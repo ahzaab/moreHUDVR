@@ -22,7 +22,7 @@ int Property iVersion Auto
 ; <--- Edit These value when updating
 int Property I_THIS_VERSION_MAJOR = 1 autoReadOnly
 int Property I_THIS_VERSION_MINOR = 0 autoReadOnly
-int Property I_THIS_VERSION_BUILD = 2 autoReadOnly
+int Property I_THIS_VERSION_BUILD = 3 autoReadOnly
 ; Main Rollover Menu
 String Property VRActivateRolloverInstance = "_root.VRActivateRolloverInstance" autoReadOnly
 String Property WSActivateRollover = "WSActivateRollover" autoReadOnly
@@ -32,7 +32,7 @@ String Property AHZEnemyLevelInstance = "_root.AHZEnemyLevelInstance.EnemyLevel_
 String Property WSEnemyMeters = "WSEnemyMeters" autoReadOnly
 
 ; SKSE oldest supported release index
-int I_MIN_SKSE_RELEASE_IDX = 58
+int I_MIN_SKSE_RELEASE_IDX = 59
 
 ; Public Functions ------------------------------------------------------------------------------------------
 Function Maintenance()
@@ -45,9 +45,6 @@ Function Maintenance()
     elseIf skseRelease < I_MIN_SKSE_RELEASE_IDX
        	Debug.MessageBox("moreHUD VR: The SKSE revision is out of date.  Please install the latest SKSE")
         isSKSEInstalled = false
-    ;elseIf (SKSE.GetScriptVersionRelease() != skseRelease)
-   ;     Debug.MessageBox("moreHUD: The SKSE scripts are out of date.  Please make sure the latest scripts are installed. \n(Script Revision: " + SKSE.GetScriptVersionRelease() + ", SKSE Revision: " + skseRelease + ")")
-   ;     isSKSEInstalled = false
     else
 		isSKSEInstalled = true
     endIf
@@ -60,7 +57,7 @@ Function Maintenance()
 	Endif
 	; Other maintenance code that only needs to run once per save load
 
-    UpdateSettings(false)
+    ; UpdateSettings(false)
 
     ; Register for this event to update the settings again incase they did not update
     ; the first time.  Since 1.5.3 Some users have reported that the widgets did not
@@ -134,7 +131,7 @@ EndEvent
 
 event OnWidgetManagerReady(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
     ; Try to update the settings again
-    UpdateSettings(false)
+    ; UpdateSettings(false)
 EndEvent
  
 Event OnMenuOpen(String MenuName)
