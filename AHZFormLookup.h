@@ -36,6 +36,11 @@ public:
 
    inline static TESObjectREFR * GetReference(TESForm * theForm)
    {
+	   if (!theForm)
+	   {
+		   return NULL;
+	   }
+
       if (theForm->GetFormType() == kFormType_Reference)
       {
          TESObjectREFR *reference = DYNAMIC_CAST(theForm, TESForm, TESObjectREFR);

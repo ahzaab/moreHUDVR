@@ -150,7 +150,9 @@ public:
       return false;
    }
 
-   VMValue * getResult() { return m_result.type == VMValue::kType_None ? NULL : &m_result; }
+   VMValue * getResult() {
+	   return m_result.type == VMValue::kType_None ? NULL : &m_result;
+   }
 
 private:
    VMClassRegistry	* m_registry;
@@ -176,6 +178,10 @@ CAHZFormLookup& CAHZFormLookup::Instance() {
 
 TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 {
+	if (!targetReference) {
+		return NULL;
+	}
+
 	TESForm * lutForm = NULL;
 	if ((lutForm = GetFormFromLookup(targetReference)) != NULL)
 	{
@@ -207,7 +213,7 @@ TESForm * CAHZFormLookup::GetTESForm(TESObjectREFR * targetReference)
 
 TESForm * CAHZFormLookup::GetFormFromLookup(TESObjectREFR * targetRef)
 {
-	if (!targetRef->baseForm)
+	if (!targetRef || !targetRef->baseForm)
 		return NULL;
 
 	if (m_LUT.find(targetRef->baseForm->formID) != m_LUT.end())
@@ -354,22 +360,28 @@ TESForm* CAHZFormLookup::GetAttachedForm(TESObjectREFR *form, string variableNam
 		  return NULL;
 
       UInt64 handle = policy->Create(form->baseForm->formType, form);
-      if (handle != policy->GetInvalidHandle())
-      {
-         CAHZGetScriptVariableFunctor scriptVariable(registry, handle, variableName);
-         registry->VisitScripts(handle, &scriptVariable);
+	  if (handle != policy->GetInvalidHandle())
+	  {
+		  CAHZGetScriptVariableFunctor scriptVariable(registry, handle, variableName);
 
-         VMValue * retValue;
-         if ((retValue = scriptVariable.getResult()) != NULL)
-         {
-            if (retValue->IsIdentifier())
-            {
-               TESForm * retForm;
-               UnpackValue<TESForm>(&retForm, retValue);
-               return retForm;
-            }
-         }
-      }
+		  // When updating to a new version of skse.  Make sure these functions are aligned correctly
+		  // This is how it should be in PapyrusVM.h
+		  // virtual void	New_1C(void);	// added in VR 1.4.15
+		  // virtual void	VisitScripts(UInt64 handle, IForEachScriptObjectFunctor * functor);
+
+		  registry->VisitScripts(handle, &scriptVariable);
+
+		  VMValue * retValue;
+		  if ((retValue = scriptVariable.getResult()) != NULL)
+		  {
+			  if (retValue->IsIdentifier())
+			  {
+				  TESForm * retForm;
+				  UnpackValue<TESForm>(&retForm, retValue);
+				  return retForm;
+			  }
+		  }
+	  }
    }
 
    return NULL;
