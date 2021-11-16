@@ -16,6 +16,7 @@
 #include "skse64/GameForms.h"
 #include "skse64/GameRTTI.h"
 #include "skse64/GameMenus.h"
+
 #include "skse64/PapyrusUI.h"
 #include "skse64/PapyrusVM.h"
 #include "skse64/PapyrusEvents.h"
@@ -350,6 +351,7 @@ extern "C"
 	   //}
 
 	   //Sleep(1000 * 2);
+
 
       // register scaleform callbacks
       g_scaleform->Register("AHZmoreHUDPlugin", RegisterScaleform);

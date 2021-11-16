@@ -73,12 +73,13 @@ EventResult AHZCrosshairRefEventHandler::ReceiveEvent(SKSECrosshairRefEvent * ev
 
 uintptr_t Enemy_Update_Hook_Base = 0x008AFE70;
 RelocAddr<uintptr_t> Enemy_Update_Hook_Target(Enemy_Update_Hook_Base + 0x44);
-void EnemyHealth_Update_Hook(UInt32 * refHandle, NiPointer<TESObjectREFR> *refrOut)
+bool __cdecl EnemyHealth_Update_Hook(UInt32 & refHandle, NiPointer<TESObjectREFR> &refrOut)
 {
-   TESObjectREFR * reference = *refrOut;
+   bool result = LookupREFRByHandle(refHandle, refrOut);
+   TESObjectREFR * reference = refrOut;
    if (!reference)
    {
-      return;
+      return result;
    }
    UInt16 npcLevel = 0;
    UInt32 isSentient = 0;
@@ -100,6 +101,7 @@ void EnemyHealth_Update_Hook(UInt32 * refHandle, NiPointer<TESObjectREFR> *refrO
    ahzTargetHandle.m_data.Level = npcLevel;
    ahzTargetHandle.m_data.IsSentient = isSentient;
    ahzTargetHandle.Release();
+   return result;
 }
 //RelocPtr<SimpleLock>		globalMenuStackLock(0x1EE4A60);
 CAHZActorData GetCurrentEnemyData()
@@ -113,55 +115,77 @@ CAHZActorData GetCurrentEnemyData()
 
 void AHZInstallEnemyHealthUpdateHook()
 {
-   struct EnemyHealth_Code : Xbyak::CodeGenerator {
-       EnemyHealth_Code(void * buf, UInt64 funcAddr) : Xbyak::CodeGenerator(4096, buf)
-      {
-         Xbyak::Label retnLabel;
-         Xbyak::Label funcLabel;
-         Xbyak::Label LookupREFRByHandleLbl;
+   //struct EnemyHealth_Code : Xbyak::CodeGenerator {
+   //    EnemyHealth_Code(void * buf, UInt64 funcAddr) : Xbyak::CodeGenerator(4096, buf)
+   //   {
+   //      Xbyak::Label retnLabel;
+   //      Xbyak::Label funcLabel;
+   //      Xbyak::Label LookupREFRByHandleLbl;
 
-         // Call original code and use the same signature as LookupREFRByHandle to pass the object ref to the hooked
-         // function
-         //call(LookupREFRByHandle);
-         call(ptr[rip + LookupREFRByHandleLbl]);
+   //      // Call original code and use the same signature as LookupREFRByHandle to pass the object ref to the hooked
+   //      // function
+   //      //call(LookupREFRByHandle);
+   //      call(ptr[rip + LookupREFRByHandleLbl]);
 
-         // Call our function (Same signature as LookupREFRByHandle)
-         call(ptr[rip + funcLabel]);
+   //      // Call our function (Same signature as LookupREFRByHandle)
+   //      call(ptr[rip + funcLabel]);
 
-         // Jump back from the Trampoline
-         jmp(ptr[rip + retnLabel]);
+   //      // Jump back from the Trampoline
+   //      jmp(ptr[rip + retnLabel]);
 
-         L(funcLabel);
-         dq(funcAddr);
+   //      L(funcLabel);
+   //      dq(funcAddr);
 
-         L(LookupREFRByHandleLbl);
-         dq(LookupREFRByHandle.GetUIntPtr());
+   //      L(LookupREFRByHandleLbl);
+   //      dq(LookupREFRByHandle.GetUIntPtr());
 
-         L(retnLabel);
-         dq(Enemy_Update_Hook_Target.GetUIntPtr() + 5);
-      }
-   };
+   //      L(retnLabel);
+   //      dq(Enemy_Update_Hook_Target.GetUIntPtr() + 5);
+   //   }
+   //};
 
-   void * codeBuf = g_localTrampoline.StartAlloc();
-   EnemyHealth_Code code(codeBuf, (uintptr_t)EnemyHealth_Update_Hook);
-   g_localTrampoline.EndAlloc(code.getCurr());
+   //void * codeBuf = g_localTrampoline.StartAlloc();
+   //EnemyHealth_Code code(codeBuf, (uintptr_t)EnemyHealth_Update_Hook);
+   //g_localTrampoline.EndAlloc(code.getCurr());
 
-   _VMESSAGE("g_localTrampoline, EnemyHealth_Update_Hook Size: %d", code.getSize());
+   //_VMESSAGE("g_localTrampoline, EnemyHealth_Update_Hook Size: %d", code.getSize());
 
-   g_branchTrampoline.Write5Branch(Enemy_Update_Hook_Target.GetUIntPtr(), uintptr_t(code.getCode()));
+   //g_branchTrampoline.Write5Branch(Enemy_Update_Hook_Target.GetUIntPtr(), uintptr_t(code.getCode()));
+
+    g_branchTrampoline.Write5Call(Enemy_Update_Hook_Target.GetUIntPtr(), uintptr_t(EnemyHealth_Update_Hook));
 
    _VMESSAGE("g_branchTrampoline, Enemy_Update_Hook_Target Size: %d", 14); 
 }
 
 
 RelocAddr<uintptr_t> kHook_Wand_LookupREFRByHandle_Enter(0x0053EC60 + 0x7F);
-void Hook_Wand_LookupREFRByHandle(UInt32 * refHandle, NiPointer<TESObjectREFR> *refrOut)
+//void Hook_Wand_LookupREFRByHandle(UInt32 & refHandle, NiPointer<TESObjectREFR> &refrOut)
+//{
+////bool result = LookupREFRByHandle(refHandle, refrOut);
+//
+//	//;TESObjectREFR * reference = refrOut->m_pObject;
+//
+//    //_VMESSAGE("reference", 14);
+//
+//	s_ahzWandReference.Lock();
+//	s_ahzWandReference.m_data = refrOut;
+//    //s_ahzWandReference.m_data = reference;
+//	s_ahzWandReference.Release();
+//}
+bool __cdecl  Hook_Wand_LookupREFRByHandle(UInt32& refHandle, NiPointer<TESObjectREFR>& refrOut)
 {
-	TESObjectREFR * reference = refrOut->m_pObject;
+    bool result = LookupREFRByHandle(refHandle, refrOut);
 
-	s_ahzWandReference.Lock();
-	s_ahzWandReference.m_data = reference;
-	s_ahzWandReference.Release();
+        //;TESObjectREFR * reference = refrOut->m_pObject;
+
+        //_VMESSAGE("reference", 14);
+
+    s_ahzWandReference.Lock();
+    s_ahzWandReference.m_data = refrOut;
+    //s_ahzWandReference.m_data = reference;
+    s_ahzWandReference.Release();
+
+    return result;
 }
 
 //RelocPtr<SimpleLock>		globalMenuStackLock(0x1EE4A60);
@@ -170,48 +194,56 @@ TESObjectREFR * GetCurrentWandReference()
 	TESObjectREFR* refr;
 	s_ahzWandReference.Lock();
 	refr = s_ahzWandReference.m_data;
+    //if (s_ahzWandReference.m_data == nullptr) {
+    //    refr = nullptr;
+    //}
+    //else {
+    //    refr = s_ahzWandReference.m_data->get();
+    //}
 	s_ahzWandReference.Release();
 	return refr;
 }
 
 void AHZInstallWandLookupREFRByHandle()
 {
-	struct WandUpdate_Code : Xbyak::CodeGenerator {
-        WandUpdate_Code(void * buf, UInt64 funcAddr) : Xbyak::CodeGenerator(4096, buf)
-		{
-			Xbyak::Label retnLabel;
-			Xbyak::Label funcLabel;
-            Xbyak::Label LookupREFRByHandleLbl;
+	//struct WandUpdate_Code : Xbyak::CodeGenerator {
+ //       WandUpdate_Code(void * buf, UInt64 funcAddr) : Xbyak::CodeGenerator(4096, buf)
+	//	{
+	//		Xbyak::Label retnLabel;
+	//		Xbyak::Label funcLabel;
+ //           Xbyak::Label LookupREFRByHandleLbl;
 
-			// Call original code and use the same signature as LookupREFRByHandle to pass the object ref to the hooked
-			// function
-			//call(LookupREFRByHandle);
-            call(ptr[rip + LookupREFRByHandleLbl]);
+	//		// Call original code and use the same signature as LookupREFRByHandle to pass the object ref to the hooked
+	//		// function
+	//		//call(LookupREFRByHandle);
+ //           call(ptr[rip + LookupREFRByHandleLbl]);
 
-			// Call our function (Same signature as LookupREFRByHandle)
-			call(ptr[rip + funcLabel]);
+	//		// Call our function (Same signature as LookupREFRByHandle)
+	//		call(ptr[rip + funcLabel]);
 
-			// Jump back from the Trampoline
-			jmp(ptr[rip + retnLabel]);
+	//		// Jump back from the Trampoline
+	//		jmp(ptr[rip + retnLabel]);
 
-			L(funcLabel);
-			dq(funcAddr);
+	//		L(funcLabel);
+	//		dq(funcAddr);
 
-            L(LookupREFRByHandleLbl);
-            dq(LookupREFRByHandle.GetUIntPtr());
+ //           L(LookupREFRByHandleLbl);
+ //           dq(LookupREFRByHandle.GetUIntPtr());
 
-			L(retnLabel);
-			dq(kHook_Wand_LookupREFRByHandle_Enter.GetUIntPtr() + 5);
-		}
-	};
+	//		L(retnLabel);
+	//		dq(kHook_Wand_LookupREFRByHandle_Enter.GetUIntPtr() + 5);
+	//	}
+	//};
 
-	void * codeBuf = g_localTrampoline.StartAlloc();
-    WandUpdate_Code code(codeBuf, (uintptr_t)Hook_Wand_LookupREFRByHandle);
-	g_localTrampoline.EndAlloc(code.getCurr());
-    
-    _VMESSAGE("g_localTrampoline, Hook_Wand_LookupREFRByHandle Size: %d", code.getSize());
+	//void * codeBuf = g_localTrampoline.StartAlloc();
+ //   WandUpdate_Code code(codeBuf, (uintptr_t)Hook_Wand_LookupREFRByHandle);
+	//g_localTrampoline.EndAlloc(code.getCurr());
+ //   
+ //   _VMESSAGE("g_localTrampoline, Hook_Wand_LookupREFRByHandle Size: %d", code.getSize());
 
-	g_branchTrampoline.Write5Branch(kHook_Wand_LookupREFRByHandle_Enter.GetUIntPtr(), uintptr_t(code.getCode()));
+	//g_branchTrampoline.Write5Branch(kHook_Wand_LookupREFRByHandle_Enter.GetUIntPtr(), uintptr_t(code.getCode()));
+
+    g_branchTrampoline.Write5Call(kHook_Wand_LookupREFRByHandle_Enter.GetUIntPtr(), uintptr_t(Hook_Wand_LookupREFRByHandle));
 
     _VMESSAGE("g_branchTrampoline, Hook_Wand_LookupREFRByHandle Size: %d", 14);
 }
