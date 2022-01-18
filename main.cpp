@@ -16,6 +16,7 @@
 #include "skse64/GameForms.h"
 #include "skse64/GameRTTI.h"
 #include "skse64/GameMenus.h"
+
 #include "skse64/PapyrusUI.h"
 #include "skse64/PapyrusVM.h"
 #include "skse64/PapyrusEvents.h"
@@ -53,7 +54,7 @@ SKSEMessagingInterface *g_skseMessaging = NULL;
 SKSETrampolineInterface * g_trampoline = nullptr;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (10004)
+#define PLUGIN_VERSION  (10005)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -350,6 +351,7 @@ extern "C"
 	   //}
 
 	   //Sleep(1000 * 2);
+
 
       // register scaleform callbacks
       g_scaleform->Register("AHZmoreHUDPlugin", RegisterScaleform);

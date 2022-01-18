@@ -2005,12 +2005,20 @@ void CAHZScaleform::ProcessValidTarget(TESObjectREFR* targetObject, GFxFunctionH
         return;
     }
 
+    //if (!pTargetReference->baseForm->formID) {
+    //    // return false, indicating that the target object is not valid for acquiring data
+    //    args->result->SetBool(false);
+    //    args->args[0].DeleteMember("dataObj");
+    //    return;
+    //}
+
     bool canCarry = false;
     bool isActivator = false;
 
     TESForm *targetForm = AHZGetForm(pTargetReference);
     TESForm *spellItem = NULL;
-
+    // The problem is here, the form can be invalid and through an access violation because of a misalignment
+    // or some junk data
     if (pTargetReference->baseForm && pTargetReference->baseForm->GetFormType() == kFormType_Activator && targetForm)
     {
         isActivator = true;

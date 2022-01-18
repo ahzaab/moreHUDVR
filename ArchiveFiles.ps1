@@ -7,7 +7,12 @@ if (!$(Test-Path "$destinationDataPath\Interface\vr"))
     New-Item -ItemType Directory "$destinationDataPath\Interface\vr"
     New-Item -ItemType Directory "$destinationDataPath\meshes"
     New-Item -ItemType Directory "$destinationDataPath\Scripts"
-    New-Item -ItemType Directory "$destinationDataPath\Source\Scripts"
+    New-Item -ItemType Directory "$destinationDataPath\Source\Scripts"   
+}
+
+if (!$(Test-Path "$destinationDataPath\Interface\translations"))
+{
+    New-Item -ItemType Directory "$destinationDataPath\Interface\translations"
 }
 
 if (!$(Test-Path "$destinationDataPath\Interface\exported"))
@@ -15,6 +20,7 @@ if (!$(Test-Path "$destinationDataPath\Interface\exported"))
     New-Item -ItemType Directory "$destinationDataPath\Interface\exported"
 }
 
+Copy-Item "$sourcePath\Interface\translations\ahzmorehud*.txt" -Destination "$destinationDataPath\Interface\translations"
 Copy-Item "$sourcePath\Interface\vr\activaterollover.swf" -Destination "$destinationDataPath\Interface\vr"
 Copy-Item "$sourcePath\Interface\vr\AHZEnemyLevel.swf" -Destination "$destinationDataPath\Interface\vr"
 Copy-Item "$sourcePath\meshes\vr_enemyhealthbar.nif" -Destination "$destinationDataPath\meshes"

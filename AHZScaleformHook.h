@@ -30,8 +30,9 @@ public:
 };
 
 class SafeWandReferenceDataHolder : public SafeDataHolder<TESObjectREFR *>
+//class SafeWandReferenceDataHolder : public SafeDataHolder<NiPointer<TESObjectREFR>*>
 {
 public:
-	SafeWandReferenceDataHolder() {};
+	SafeWandReferenceDataHolder() { m_data = nullptr; };
 	~SafeWandReferenceDataHolder() {};
 };
