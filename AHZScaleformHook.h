@@ -18,7 +18,16 @@ public:
 
 class AHZCrosshairRefEventHandler : public BSTEventSink <SKSECrosshairRefEvent>
 {
-   EventResult ReceiveEvent(SKSECrosshairRefEvent * evn, EventDispatcher<SKSECrosshairRefEvent> * dispatcher);
+	static bool s_useEvent;
+	EventResult ReceiveEvent(SKSECrosshairRefEvent * evn, EventDispatcher<SKSECrosshairRefEvent> * dispatcher);
+
+public:
+	static void SetUseEvent()
+	{
+		s_useEvent = true;
+	}
+
+	static bool GetUseEvent() { return s_useEvent; }
 };
 
 

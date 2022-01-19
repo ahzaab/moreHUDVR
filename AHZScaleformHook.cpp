@@ -16,7 +16,8 @@ using namespace std;
 bool AHZEventHandler::ahzMenuLoaded = false;
 static SafeEnemyLevelDataHolder ahzTargetHandle;
 static SafeWandReferenceDataHolder s_ahzWandReference;
-TESObjectREFR *g_ahzTargetReference;
+//TESObjectREFR *g_ahzTargetReference;
+bool AHZCrosshairRefEventHandler::s_useEvent = false;
 
 EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent* evn, EventDispatcher<MenuOpenCloseEvent>* dispatcher)
 {
@@ -63,41 +64,58 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent* evn, EventDispatch
 
 EventResult AHZCrosshairRefEventHandler::ReceiveEvent(SKSECrosshairRefEvent * evn, EventDispatcher<SKSECrosshairRefEvent> * dispatcher)
 {
-   g_ahzTargetReference = evn->crosshairRef;
+   //g_ahzTargetReference = evn->crosshairRef;
+
+    if (s_useEvent) {
+        s_ahzWandReference.Lock();
+        s_ahzWandReference.m_data = evn->crosshairRef;
+        s_ahzWandReference.Release();
+    }
+
+    if (evn->crosshairRef)
+        _MESSAGE("Event still raised %x", evn->crosshairRef->formID);
+    else
+        _MESSAGE("Event still raised <null>");
+
    return EventResult::kEvent_Continue;
 }
-
+bool __cdecl EnemyHealth_Update_Hook(UInt32& refHandle, NiPointer<TESObjectREFR>& refrOut);
 uintptr_t Enemy_Update_Hook_Base = 0x008AFE70;
 RelocAddr<uintptr_t> Enemy_Update_Hook_Target(Enemy_Update_Hook_Base + 0x44);
-bool __cdecl EnemyHealth_Update_Hook(UInt32 & refHandle, NiPointer<TESObjectREFR> &refrOut)
+bool __cdecl EnemyHealth_Update_Hook(UInt32& refHandle, NiPointer<TESObjectREFR>& refrOut)
 {
-   bool result = LookupREFRByHandle(refHandle, refrOut);
-   TESObjectREFR * reference = refrOut;
-   if (!reference)
-   {
-      return result;
-   }
-   UInt16 npcLevel = 0;
-   UInt32 isSentient = 0;
-   if (reference)
-   {
-	   if (reference->baseForm->formType == kFormType_NPC ||
-		   reference->baseForm->formType == kFormType_Character)
-	   {
-		   Actor * pNPC = DYNAMIC_CAST(reference, TESObjectREFR, Actor);
-		   if (pNPC)
-		   {
-			   npcLevel = CALL_MEMBER_FN(pNPC, GetLevel)();
-			   isSentient = CAHZActorInfo::IsSentient(pNPC);
-		   }
-	   }
-   }
+    auto func = RelocPtr<decltype(EnemyHealth_Update_Hook)>(uintptr_t(Enemy_Update_Hook_Target.GetUIntPtr() + 0x05));
+    bool result = func(refHandle, refrOut); //LookupREFRByHandle(refHandle, refrOut);
+    if (!result)
+    {
+        return result;
+    }
+    TESObjectREFR* reference = refrOut;
+    if (!reference)
+    {
+        return result;
+    }
+    UInt16 npcLevel = 0;
+    UInt32 isSentient = 0;
+    if (reference)
+    {
+        if (reference->baseForm->formType == kFormType_NPC ||
+            reference->baseForm->formType == kFormType_Character)
+        {
+            Actor* pNPC = DYNAMIC_CAST(reference, TESObjectREFR, Actor);
+            if (pNPC)
+            {
+                npcLevel = CALL_MEMBER_FN(pNPC, GetLevel)();
+                isSentient = CAHZActorInfo::IsSentient(pNPC);
+            }
+        }
+    }
 
-   ahzTargetHandle.Lock();
-   ahzTargetHandle.m_data.Level = npcLevel;
-   ahzTargetHandle.m_data.IsSentient = isSentient;
-   ahzTargetHandle.Release();
-   return result;
+    ahzTargetHandle.Lock();
+    ahzTargetHandle.m_data.Level = npcLevel;
+    ahzTargetHandle.m_data.IsSentient = isSentient;
+    ahzTargetHandle.Release();
+    return result;
 }
 //RelocPtr<SimpleLock>		globalMenuStackLock(0x1EE4A60);
 CAHZActorData GetCurrentEnemyData()
@@ -115,15 +133,21 @@ void AHZInstallEnemyHealthUpdateHook()
    _VMESSAGE("g_branchTrampoline, Enemy_Update_Hook_Target Size: %d", 14); 
 }
 
-
-RelocAddr<uintptr_t> kHook_Wand_LookupREFRByHandle_Enter(0x0053EC60 + 0x7F);
+bool __cdecl  Hook_Wand_LookupREFRByHandle(UInt32& refHandle, NiPointer<TESObjectREFR>& refrOut);
+//RelocAddr<uintptr_t> kHook_Wand_LookupREFRByHandle_Enter(0x0053EC60 + 0x7F);
+RelocAddr<uintptr_t> kHook_Wand_LookupREFRByHandle_Enter(0x006D2F82);
 bool __cdecl  Hook_Wand_LookupREFRByHandle(UInt32& refHandle, NiPointer<TESObjectREFR>& refrOut)
 {
-    bool result = LookupREFRByHandle(refHandle, refrOut);
-    s_ahzWandReference.Lock();
-    s_ahzWandReference.m_data = refrOut;
-    s_ahzWandReference.Release();
-
+    auto func = RelocPtr<decltype(Hook_Wand_LookupREFRByHandle)>(uintptr_t(kHook_Wand_LookupREFRByHandle_Enter.GetUIntPtr() + 0x05));
+    bool result = func(refHandle, refrOut); //LookupREFRByHandle(refHandle, refrOut); 
+    if (!result) {
+        return result;
+    }
+    if (!AHZCrosshairRefEventHandler::GetUseEvent()) {
+        s_ahzWandReference.Lock();
+        s_ahzWandReference.m_data = refrOut;
+        s_ahzWandReference.Release();
+    }
     return result;
 }
 
@@ -152,6 +176,13 @@ void SetupFixedString(const char* constString, char * buffer, UInt32 bufferSize)
 
 void AHZScaleformHooks_Commit()
 {
+    _MESSAGE("Hooking the enemy health");
     AHZInstallEnemyHealthUpdateHook();
-    AHZInstallWandLookupREFRByHandle();
+
+    if (!AHZCrosshairRefEventHandler::GetUseEvent()) {
+        _MESSAGE("Hooking the wand object reference");
+        AHZInstallWandLookupREFRByHandle();
+    }
+
+    _MESSAGE("Hooks Installed");
 }

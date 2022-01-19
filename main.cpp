@@ -54,7 +54,8 @@ SKSEMessagingInterface *g_skseMessaging = NULL;
 SKSETrampolineInterface * g_trampoline = nullptr;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (10005)
+#define PLUGIN_VERSION  (10006)
+const SKSEInterface* g_skse;
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;
@@ -270,6 +271,24 @@ void EventListener(SKSEMessagingInterface::Message* msg)
 
 	   _MESSAGE("Third party .mHud file processing completed.");
    }
+
+   if (string(msg->sender) == "SKSE" && msg->type == SKSEMessagingInterface::kMessage_PostLoad)
+   {
+       _MESSAGE("Checking if \"po3_Tweaks\" is installed");
+       // If po3 tweaks are installed, then use the event because it was patched by po3_Tweaks
+       auto po3_Tweaks = g_skse->GetPluginInfo("po3_Tweaks");
+       if (po3_Tweaks && po3_Tweaks->version >= 1)
+       {
+           _MESSAGE("\"po3_Tweaks\" is installed, so used the patched crosshair event");
+           AHZCrosshairRefEventHandler::SetUseEvent();
+       }
+       else {
+           _MESSAGE("\"po3_Tweaks\" is not installed, so used the moreHUD hook");
+       }
+       // We cannot add the hooks until after we know if po3_Tweaks is loaded
+       AHZScaleformHooks_Commit();
+   }
+
 }
 
 extern "C"
@@ -345,14 +364,13 @@ extern "C"
 
    bool SKSEPlugin_Load(const SKSEInterface * skse)
    {
-	   //while (!IsDebuggerPresent())
+       g_skse = skse;
+       //while (!IsDebuggerPresent())
 	   //{
 	   //   Sleep(10);
 	   //}
 
 	   //Sleep(1000 * 2);
-
-
       // register scaleform callbacks
       g_scaleform->Register("AHZmoreHUDPlugin", RegisterScaleform);
 
@@ -391,8 +409,6 @@ extern "C"
               return false;
           }
       }
-
-	  AHZScaleformHooks_Commit();
 
       _MESSAGE("%s -v%d Loaded", "AHZmoreHUDPlugin", PLUGIN_VERSION);
       return true;
