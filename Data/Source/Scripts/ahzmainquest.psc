@@ -22,7 +22,7 @@ int Property iVersion Auto
 ; <--- Edit These value when updating
 int Property I_THIS_VERSION_MAJOR = 1 autoReadOnly
 int Property I_THIS_VERSION_MINOR = 0 autoReadOnly
-int Property I_THIS_VERSION_BUILD = 5 autoReadOnly
+int Property I_THIS_VERSION_BUILD = 7 autoReadOnly
 ; Main Rollover Menu
 String Property VRActivateRolloverInstance = "_root.VRActivateRolloverInstance" autoReadOnly
 String Property WSActivateRollover = "WSActivateRollover" autoReadOnly

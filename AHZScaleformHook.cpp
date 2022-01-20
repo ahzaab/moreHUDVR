@@ -72,6 +72,11 @@ RelocAddr<uintptr_t> Enemy_Update_Hook_Target(Enemy_Update_Hook_Base + 0x44);
 bool __cdecl EnemyHealth_Update_Hook(UInt32 & refHandle, NiPointer<TESObjectREFR> &refrOut)
 {
    bool result = LookupREFRByHandle(refHandle, refrOut);
+   if (!result)
+   {
+       return result;
+   }
+
    TESObjectREFR * reference = refrOut;
    if (!reference)
    {
@@ -120,6 +125,13 @@ RelocAddr<uintptr_t> kHook_Wand_LookupREFRByHandle_Enter(0x0053EC60 + 0x7F);
 bool __cdecl  Hook_Wand_LookupREFRByHandle(UInt32& refHandle, NiPointer<TESObjectREFR>& refrOut)
 {
     bool result = LookupREFRByHandle(refHandle, refrOut);
+    if (!result) {
+        s_ahzWandReference.Lock();
+        s_ahzWandReference.m_data = nullptr;
+        s_ahzWandReference.Release();
+        return result;
+    }
+
     s_ahzWandReference.Lock();
     s_ahzWandReference.m_data = refrOut;
     s_ahzWandReference.Release();

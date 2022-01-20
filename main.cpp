@@ -54,7 +54,7 @@ SKSEMessagingInterface *g_skseMessaging = NULL;
 SKSETrampolineInterface * g_trampoline = nullptr;
 AHZEventHandler menuEvent;
 AHZCrosshairRefEventHandler crossHairEvent;
-#define PLUGIN_VERSION  (10005)
+#define PLUGIN_VERSION  (10007)
 
 // Just initialize to start routing to the console window
 CAHZDebugConsole theDebugConsole;

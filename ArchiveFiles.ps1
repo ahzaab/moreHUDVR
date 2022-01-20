@@ -24,10 +24,10 @@ Copy-Item "$sourcePath\Interface\translations\ahzmorehud*.txt" -Destination "$de
 Copy-Item "$sourcePath\Interface\vr\activaterollover.swf" -Destination "$destinationDataPath\Interface\vr"
 Copy-Item "$sourcePath\Interface\vr\AHZEnemyLevel.swf" -Destination "$destinationDataPath\Interface\vr"
 Copy-Item "$sourcePath\meshes\vr_enemyhealthbar.nif" -Destination "$destinationDataPath\meshes"
-Copy-Item "$sourcePath\Scripts\ahz*.pex" -Destination "$destinationDataPath\Scripts"
-Copy-Item "$sourcePath\Source\Scripts\ahz*.psc" -Destination "$destinationDataPath\Source\Scripts"
+Copy-Item "$sourcePath\Scripts\ahz*.pex" -Exclude "AhzMoreHudIE.pex" -Destination "$destinationDataPath\Scripts"
+Copy-Item "$sourcePath\Source\Scripts\ahz*.psc" -Exclude "AhzMoreHudIE.psc" -Destination "$destinationDataPath\Source\Scripts"
 Copy-Item "$sourcePath\AHZmoreHUD.esp" -Destination "$destinationDataPath"
-Copy-Item "$sourcePath\Interface\exported\ahz*.*" -Destination "$destinationDataPath\Interface\exported"
+Copy-Item "$sourcePath\Interface\exported\ahz*.*" -Exclude "Ahz*Inventory.swf" -Destination "$destinationDataPath\Interface\exported"
 
 #AS2
 

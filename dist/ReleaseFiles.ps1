@@ -36,7 +36,7 @@ $items += Get-ChildItem "$sourceDataDir" -Filter ahzmorehud.esp
 $items += Get-ChildItem "$sourceDataDir\meshes" -Filter vr_enemyhealthbar.nif
 $items += Get-ChildItem "$sourceDataDir\Interface" -Include @('ahzmorehudlogo.dds', 'ahzmorehud_*.txt', 'activaterollover.swf', 'AHZEnemyLevel.swf') -Recurse
 
-$filesToCopy = $items | Select-ObjecT -ExpandProperty FullName
+$filesToCopy = $items | Select-ObjecT -ExpandProperty FullName | Where-Object {$_ -notlike '*ahz*ie.*'}
 
 $filesToCopy | ForEach-Object {
     $dest = $_.Replace($sourceDataDir,$destDataDir); 
